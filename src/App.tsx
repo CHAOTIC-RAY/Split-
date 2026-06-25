@@ -44,6 +44,20 @@ export default function App() {
     const updatedBills = [bill, ...bills];
     setBills(updatedBills);
     localStorage.setItem('bill_history', JSON.stringify(updatedBills));
+    
+    // Save items for offline price tracker
+    const existingPricesStr = localStorage.getItem('product_prices');
+    const existingPrices = existingPricesStr ? JSON.parse(existingPricesStr) : [];
+    bill.items.forEach(item => {
+      existingPrices.push({
+        name: item.name,
+        price: (item.price || 0) / (item.quantity || 1),
+        shopName: bill.shopName || "Unknown Shop",
+        date: bill.date
+      });
+    });
+    localStorage.setItem('product_prices', JSON.stringify(existingPrices));
+
     setScannedBill(null);
     setActiveTab('history');
   };

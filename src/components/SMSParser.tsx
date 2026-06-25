@@ -14,14 +14,27 @@ export default function SMSParser({ onTransaction }: SMSParserProps) {
     if (!smsText) return;
     setIsParsing(true);
     try {
-      const res = await fetch('/api/parse-sms', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ smsText })
-      });
-      const data = await res.json();
+      // Simple regex-based non-API parsing locally
+      const amountMatch = smsText.match(/\$([0-9]+\.[0-9]+)/);
+      const amount = amountMatch ? parseFloat(amountMatch[1]) : 0;
+      
+      let bankName = "Unknown Bank";
+      if (smsText.toLowerCase().includes("chase")) bankName = "Chase";
+      if (smsText.toLowerCase().includes("bank of america")) bankName = "BoA";
+      
+      let sender = "Unknown Merchant";
+      const atMatch = smsText.match(/at\s+([A-Z0-9\s]+)\./i);
+      if (atMatch) sender = atMatch[1].trim();
+      else if (smsText.toLowerCase().includes("sent to")) {
+        const sentMatch = smsText.match(/sent to\s+([A-Z0-9\s]+)\s+for/i);
+        if (sentMatch) sender = sentMatch[1].trim();
+      }
+
       onTransaction({
-        ...data,
+        amount,
+        sender,
+        bankName,
+        date: new Date().toISOString(),
         id: Math.random().toString(36).substr(2, 9),
         isHousehold: false
       });

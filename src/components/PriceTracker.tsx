@@ -11,9 +11,15 @@ export default function PriceTracker() {
     if (!query) return;
     setIsSearching(true);
     try {
-      const res = await fetch(`/api/compare-prices?productName=${encodeURIComponent(query)}`);
-      const data = await res.json();
-      setResults(data);
+      // Offline local search
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const savedPrices = localStorage.getItem('product_prices');
+      const allPrices: ProductPrice[] = savedPrices ? JSON.parse(savedPrices) : [];
+      
+      const matches = allPrices.filter(p => 
+        p.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setResults(matches);
     } catch (error) {
       console.error(error);
     } finally {

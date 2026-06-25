@@ -25,26 +25,42 @@ export default function HomeManager({ user, onHomeUpdate }: HomeManagerProps) {
   }, [user.homeId]);
 
   const createHome = async () => {
-    const res = await fetch('/api/home/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: homeName, userId: user.id, userName: user.name })
-    });
-    const data = await res.json();
+    const homeId = Math.random().toString(36).substr(2, 9);
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    
+    const data: Home = {
+      id: homeId,
+      name: homeName,
+      inviteCode: code,
+      members: [{ id: user.id, name: user.name, email: '' }]
+    };
+
     setCurrentHome(data);
     onHomeUpdate(data);
+    
+    const homesStr = localStorage.getItem('all_homes') || '{}';
+    const homes = JSON.parse(homesStr);
+    homes[homeId] = data;
+    localStorage.setItem('all_homes', JSON.stringify(homes));
+    
     localStorage.setItem(`home_${data.id}`, JSON.stringify(data));
     localStorage.setItem('bill_user', JSON.stringify({ ...user, homeId: data.id }));
   };
 
   const joinHome = async () => {
-    const res = await fetch('/api/home/join', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ inviteCode, userId: user.id, userName: user.name })
-    });
-    const data = await res.json();
-    if (data.error) return alert(data.error);
+    const homesStr = localStorage.getItem('all_homes') || '{}';
+    const homes = JSON.parse(homesStr);
+    
+    const homeId = Object.keys(homes).find(id => homes[id].inviteCode === inviteCode);
+    
+    if (!homeId) return alert('Home not found');
+    
+    const data = homes[homeId];
+    if (!data.members.find((m: any) => m.id === user.id)) {
+      data.members.push({ id: user.id, name: user.name, email: '' });
+      homes[homeId] = data;
+      localStorage.setItem('all_homes', JSON.stringify(homes));
+    }
     
     setCurrentHome(data);
     onHomeUpdate(data);
