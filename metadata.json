@@ -1,0 +1,6 @@
+{
+  "name": "BillSplit & Tracker",
+  "description": "AI-powered bill scanner, splitter, and expense tracker for households.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
