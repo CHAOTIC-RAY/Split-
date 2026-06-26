@@ -23,8 +23,14 @@ export default function App() {
   const [home, setHome] = useState<Home | null>(null);
   const [bills, setBills] = useState<Bill[]>([]);
   const [scannedBill, setScannedBill] = useState<Partial<Bill> | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<'local' | 'gemini-lite'>('local');
 
   useEffect(() => {
+    const savedModel = localStorage.getItem('bill_selected_model');
+    if (savedModel === 'gemini-lite' || savedModel === 'local') {
+      setSelectedModel(savedModel);
+    }
     const savedUser = localStorage.getItem('bill_user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
@@ -85,19 +91,117 @@ export default function App() {
         </div>
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-full text-xs font-medium text-zinc-300 border border-white/5 backdrop-blur-md">
-            <div className="w-2 h-2 bg-green-400 rounded-full shadow-[0_0_8px_rgba(74,222,128,0.8)]"></div>
-            Local OCR Active
+            <div className="w-2 h-2 bg-indigo-400 rounded-full shadow-[0_0_8px_rgba(129,140,248,0.8)]"></div>
+            {selectedModel === 'local' ? 'MobileViT (WebGPU)' : 'Gemini 2.0 Flash-Lite'}
           </div>
           {home && (
             <span className="text-xs font-medium bg-indigo-500/20 text-indigo-300 px-3 py-1.5 rounded-xl border border-indigo-500/30 backdrop-blur-md">
               {home.name}
             </span>
           )}
-          <button className="p-2 hover:bg-white/10 rounded-full transition-colors text-zinc-400 hover:text-white">
+          <button 
+            onClick={() => setIsSettingsOpen(true)}
+            className="p-2 hover:bg-white/10 rounded-full transition-colors text-zinc-400 hover:text-white"
+          >
             <Settings className="w-5 h-5" />
           </button>
         </div>
       </header>
+
+      {/* Settings Modal */}
+      <AnimatePresence>
+        {isSettingsOpen && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSettingsOpen(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl p-6 overflow-hidden"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-indigo-400" />
+                  Settings
+                </h2>
+                <button onClick={() => setIsSettingsOpen(false)} className="p-2 hover:bg-white/10 rounded-full text-zinc-400 hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="text-sm font-medium text-zinc-400 block mb-3">AI Scanning Model</label>
+                  <div className="grid gap-3">
+                    <button
+                      onClick={() => {
+                        setSelectedModel('local');
+                        localStorage.setItem('bill_selected_model', 'local');
+                      }}
+                      className={cn(
+                        "flex items-start gap-3 p-4 rounded-xl border transition-all text-left",
+                        selectedModel === 'local' 
+                          ? "bg-indigo-500/10 border-indigo-500/50 text-white" 
+                          : "bg-white/5 border-white/5 text-zinc-400 hover:bg-white/10"
+                      )}
+                    >
+                      <div className={cn(
+                        "mt-1 w-4 h-4 rounded-full border-2 flex items-center justify-center",
+                        selectedModel === 'local' ? "border-indigo-400" : "border-zinc-600"
+                      )}>
+                        {selectedModel === 'local' && <div className="w-2 h-2 bg-indigo-400 rounded-full" />}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-sm">Local Vision (MobileViT)</div>
+                        <p className="text-xs text-zinc-500 mt-1">Runs entirely in your browser using WebGPU. Privacy-focused, no data leaves your device.</p>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setSelectedModel('gemini-lite');
+                        localStorage.setItem('bill_selected_model', 'gemini-lite');
+                      }}
+                      className={cn(
+                        "flex items-start gap-3 p-4 rounded-xl border transition-all text-left",
+                        selectedModel === 'gemini-lite' 
+                          ? "bg-indigo-500/10 border-indigo-500/50 text-white" 
+                          : "bg-white/5 border-white/5 text-zinc-400 hover:bg-white/10"
+                      )}
+                    >
+                      <div className={cn(
+                        "mt-1 w-4 h-4 rounded-full border-2 flex items-center justify-center",
+                        selectedModel === 'gemini-lite' ? "border-indigo-400" : "border-zinc-600"
+                      )}>
+                        {selectedModel === 'gemini-lite' && <div className="w-2 h-2 bg-indigo-400 rounded-full" />}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-sm">Gemini 2.0 Flash-Lite</div>
+                        <p className="text-xs text-zinc-500 mt-1">Cloud-powered AI with advanced extraction. High accuracy, requires internet connection.</p>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/5">
+                  <button 
+                    onClick={() => setIsSettingsOpen(false)}
+                    className="w-full py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)]"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-4 pb-28 pt-6">
@@ -105,7 +209,7 @@ export default function App() {
           {activeTab === 'scan' && (
             <motion.div key="scan" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
               {!scannedBill ? (
-                <BillScanner onScan={setScannedBill} />
+                <BillScanner onScan={setScannedBill} model={selectedModel} />
               ) : (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">

@@ -36,7 +36,8 @@ export default function SMSParser({ onTransaction }: SMSParserProps) {
         bankName,
         date: new Date().toISOString(),
         id: Math.random().toString(36).substr(2, 9),
-        isHousehold: false
+        isHousehold: false,
+        text: smsText
       });
       setSmsText('');
     } catch (error) {

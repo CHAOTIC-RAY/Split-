@@ -32,7 +32,8 @@ export default function HomeManager({ user, onHomeUpdate }: HomeManagerProps) {
       id: homeId,
       name: homeName,
       inviteCode: code,
-      members: [{ id: user.id, name: user.name, email: '' }]
+      members: [{ id: user.id, name: user.name, email: '' }],
+      billHistory: []
     };
 
     setCurrentHome(data);
