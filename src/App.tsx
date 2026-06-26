@@ -87,7 +87,7 @@ export default function App() {
           <div className="w-8 h-8 bg-indigo-500/80 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.5)]">
             <PlusCircle className="text-white w-5 h-5" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-white">OmniSplit</h1>
+          <h1 className="text-xl font-bold tracking-tight text-white">Split</h1>
         </div>
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-full text-xs font-medium text-zinc-300 border border-white/5 backdrop-blur-md">
